@@ -2,6 +2,7 @@ package security.smartpass;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.provider.SyncStateContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import security.common.Constants;
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -40,7 +43,7 @@ public class Main2Activity extends AppCompatActivity {
         accountModels = loginDatabaseAdapter.getAllAccounts();
 
         Resources res =getResources();
-        list= ( ListView )findViewById( R.id.list );  // List defined in XML ( See Below )
+        list= ( ListView )findViewById( R.id.listAccounts );  // List defined in XML ( See Below )
 
 
         Button btnRegister= (Button)findViewById(R.id.createBtn);
@@ -55,7 +58,14 @@ public class Main2Activity extends AppCompatActivity {
         btnDeleteAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loginDatabaseAdapter.dropTable();
+                //drops table
+                //then creates table
+                // then opens table
+                loginDatabaseAdapter.deleteTable();
+                Intent intent = new Intent(Main2Activity.this, NotificationService.class);
+                intent.putExtra("ACTION", Constants.ACTION_DELETE_TABLE_WEAR);
+                startService(intent);
+                Log.d("main activity", "deleting table entries");
             }
         });
 
@@ -63,6 +73,18 @@ public class Main2Activity extends AppCompatActivity {
         Log.w("smartpass:",String.valueOf(accountModels.size()));
         adapter=new AccountModelViewAdapter( this, accountModels,res );
         list.setAdapter( adapter );
+
+
+        //Create background service - for temporary testing only
+        startService(new Intent(this, BackgroundService.class));
+        Log.w("smartpass:","created service");
+
+    }
+
+    private void createBackgroundService() {
+        startService(new Intent(this, BackgroundService.class));
+
+
     }
 
     public void createNewAccount() {

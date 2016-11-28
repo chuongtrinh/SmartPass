@@ -61,6 +61,10 @@ public class LoginWearDatabaseAdapter {
         // Toast.makeText(context, "New Account Is Successfully Saved", Toast.LENGTH_LONG).show();
 
     }
+    public void deleteTable() {
+        db.execSQL("DELETE FROM ACCOUNTS");
+        Toast.makeText(context, "All accounts have been deleted", Toast.LENGTH_LONG).show();
+    }
     public void dropTable() {
         db.execSQL("DROP TABLE IF EXISTS ACCOUNTS");
         Toast.makeText(context, "All accounts have been deleted", Toast.LENGTH_LONG).show();
@@ -85,17 +89,17 @@ public class LoginWearDatabaseAdapter {
         return false;
     }
 
-    public List<AccountWearModel> getSinlgeEntry(String appId)
+    public List<AccountWearModel> getSingleEntry(String appId)
     {
-
+        List<AccountWearModel> accounts = new ArrayList<>();
         Cursor cursor=db.query("ACCOUNTS", null, "APPID=?", new String[]{appId}, null, null, null);
         if(cursor.getCount()<1) // UserName Not Exist
         {
             cursor.close();
-            return null;
+            return accounts;
         }
 
-        List<AccountWearModel> accounts = new ArrayList<>();
+
         cursor.moveToFirst();
         while (cursor.isAfterLast() == false) {
             AccountWearModel acc = new AccountWearModel();

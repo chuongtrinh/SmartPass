@@ -22,6 +22,7 @@ public class DatabaseHelper  extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase _db)
     {
         _db.execSQL(LoginDatabaseAdapter.DATABASE_CREATE);
+        Log.d("Database", "After creating table accounts");
 
     }
     // Called when there is a database version mismatch meaning that the version

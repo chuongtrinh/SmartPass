@@ -21,7 +21,6 @@ import java.util.List;
 public class AccountModelViewAdapter extends BaseAdapter implements View.OnClickListener {
 
 
-    /*********** Declare Used Variables *********/
     private Activity activity;
     private List data;
     private static LayoutInflater inflater=null;
@@ -29,21 +28,17 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
     AccountModel tempValues=null;
     int i=0;
 
-    /*************  CustomAdapter Constructor *****************/
     public AccountModelViewAdapter(Activity a, List d, Resources resLocal) {
 
-        /********** Take passed values **********/
         activity = a;
         data=d;
         res = resLocal;
 
-        /***********  Layout inflator to call external xml layout () ***********/
         inflater = ( LayoutInflater )activity.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     }
 
-    /******** What is the size of Passed Arraylist Size ************/
     public int getCount() {
 
         if(data.size()<=0)
@@ -59,7 +54,6 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
         return position;
     }
 
-    /********* Create a holder Class to contain inflated xml file elements *********/
     public static class ViewHolder{
 
         public TextView appName;
@@ -70,7 +64,6 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
 
     }
 
-    /****** Depends upon data size called for each row , Create each ListView row *****/
     public View getView(int position, View convertView, ViewGroup parent) {
 
         View vi = convertView;
@@ -78,10 +71,7 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
 
         if(convertView==null){
 
-            /****** Inflate tabitem.xml file for each row ( Defined below ) *******/
             vi = inflater.inflate(R.layout.tabitem, null);
-
-            /****** View Holder Object to contain tabitem.xml file elements ******/
 
             holder = new ViewHolder();
             holder.appId = (TextView) vi.findViewById(R.id.appId);
@@ -89,7 +79,6 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
             holder.userName = (TextView) vi.findViewById(R.id.userName);
             holder.image=(ImageView)vi.findViewById(R.id.image);
 
-            /************  Set holder with LayoutInflater ************/
             vi.setTag( holder );
         }
         else
@@ -102,21 +91,13 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
         }
         else
         {
-            /***** Get each Model object from Arraylist ********/
             tempValues=null;
             tempValues = (AccountModel) data.get( position );
-
-            /************  Set Model values in Holder elements ***********/
 
             holder.appName.setText( tempValues.getAppName() );
             holder.appId.setText( tempValues.getAppId() );
             holder.userName.setText( tempValues.getUserName());
-            holder.image.setImageResource(
-                    res.getIdentifier(
-                            "com.androidexample.customlistview:drawable/"+tempValues.getImage()
-                            ,null,null));
-
-            /******** Set Item Click Listner for LayoutInflater for each row *******/
+            holder.image.setImageResource(R.drawable.ic_money);
 
             vi.setOnClickListener(new OnItemClickListener( position ));
         }
@@ -127,7 +108,6 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
         Log.v("CustomAdapter", "=====Row button clicked=====");
     }
 
-    /********* Called when Item click in ListView ************/
     private class OnItemClickListener  implements View.OnClickListener {
         private int mPosition;
 
@@ -138,7 +118,6 @@ public class AccountModelViewAdapter extends BaseAdapter implements View.OnClick
         @Override
         public void onClick(View arg0) {
             Main2Activity sct = (Main2Activity)activity;
-            /****  Call  onItemClick Method inside CustomListViewAndroidExample Class ( See Below )****/
             sct.onItemClick(mPosition);
         }
     }

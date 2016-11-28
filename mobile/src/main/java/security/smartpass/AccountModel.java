@@ -1,5 +1,7 @@
 package security.smartpass;
 
+import android.provider.ContactsContract;
+
 /**
  * Created by Chuong on 11/1/2016.
  */
@@ -10,6 +12,7 @@ public class AccountModel {
     private  String UserName="";
     private  String AppUrl ="";
     private  String AppId = "";
+    private  String AppCode ="";
     private  String userFirstPassword ="";
     private String Note ="";
 
@@ -72,5 +75,13 @@ public class AccountModel {
 
     public void setNote(String note) {
         Note = note;
+    }
+
+    public String getAppCode() {
+        return AppCode;
+    }
+
+    public void setAppCode(String appCode) {
+        AppCode = appCode;
     }
 }

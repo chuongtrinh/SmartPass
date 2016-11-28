@@ -23,7 +23,7 @@ public class LoginDatabaseAdapter {
     // SQL Statement to create a new database.
     static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS "+"ACCOUNTS"+
             "( " +"APPID"+" integer primary key autoincrement,"+ "APPNAME text," +
-                "USERNAME  text,PASSWORD text, APPURL text, NOTE text); ";
+                "USERNAME  text,PASSWORD text, APPURL text, NOTE text, APPCODE text); ";
 
     public  SQLiteDatabase db;
     private final Context context;
@@ -49,7 +49,7 @@ public class LoginDatabaseAdapter {
         return db;
     }
 
-    public void insertEntry(String userName,String password,String appName, String appUrl, String note)
+    public String insertEntry(String userName,String password,String appName, String appCode, String appUrl, String note)
     {
         ContentValues newValues = new ContentValues();
         // Assign values for each row.
@@ -58,10 +58,18 @@ public class LoginDatabaseAdapter {
         newValues.put("APPNAME", appName);
         newValues.put("APPURL",appUrl);
         newValues.put("NOTE", note);
+        newValues.put("APPCODE",appCode);
 
 
-        db.insert("ACCOUNTS", null, newValues);
+        //returns the appID of the newly inserted row
+        return db.insert("ACCOUNTS", null, newValues) + "";
        // Toast.makeText(context, "New Account Is Successfully Saved", Toast.LENGTH_LONG).show();
+
+    }
+
+    public void deleteTable() {
+        db.execSQL("DELETE FROM ACCOUNTS");
+        Toast.makeText(context, "All accounts have been deleted", Toast.LENGTH_LONG).show();
 
     }
     public void dropTable() {
@@ -115,6 +123,7 @@ public class LoginDatabaseAdapter {
             acc.setAppUrl(cursor.getString(cursor.getColumnIndex("APPURL")));
            // acc.setImage(cursor.getString(cursor.getColumnIndex("IMAGE")));
             acc.setUserName(cursor.getString(cursor.getColumnIndex("USERNAME")));
+            acc.setAppCode(cursor.getString(cursor.getColumnIndex("APPCODE")));
             acc.setUserFirstPassword(cursor.getString(cursor.getColumnIndex("PASSWORD")));
 
             Log.w("SmartPass",acc.getAppId() + " " + acc.getAppName() + " " + acc.getUserName() + " " + acc.getUserFirstPassword());
@@ -126,17 +135,17 @@ public class LoginDatabaseAdapter {
         return accounts;
     }
 
-    public List<AccountModel> getSinlgeEntry(String appName)
+    public List<AccountModel> getSingleEntryWithCode(String appCode)
     {
+        List<AccountModel> accounts = new ArrayList<>();
 
-        Cursor cursor=db.query("ACCOUNTS", null, "APPNAME=?", new String[]{appName}, null, null, null);
+        Cursor cursor=db.query("ACCOUNTS", null, "APPCODE=?", new String[]{appCode}, null, null, null);
         if(cursor.getCount()<1) // UserName Not Exist
         {
             cursor.close();
-            return null;
+            return accounts;
         }
 
-        List<AccountModel> accounts = new ArrayList<>();
         cursor.moveToFirst();
         while (cursor.isAfterLast() == false) {
             AccountModel acc = new AccountModel();
@@ -145,6 +154,37 @@ public class LoginDatabaseAdapter {
             acc.setNote(cursor.getString(cursor.getColumnIndex("NOTE")));
             acc.setAppName(cursor.getString(cursor.getColumnIndex("APPNAME")));
             acc.setUserFirstPassword(cursor.getString(cursor.getColumnIndex("PASSWORD")));
+            acc.setAppId(cursor.getString(cursor.getColumnIndex("APPID")));
+            acc.setAppCode(cursor.getString(cursor.getColumnIndex("APPCODE")));
+            accounts.add(acc);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+        return accounts;
+    }
+
+    public List<AccountModel> getSingleEntry(String appName)
+    {
+        List<AccountModel> accounts = new ArrayList<>();
+
+        Cursor cursor=db.query("ACCOUNTS", null, "APPNAME=?", new String[]{appName}, null, null, null);
+        if(cursor.getCount()<1) // UserName Not Exist
+        {
+            cursor.close();
+            return accounts;
+        }
+
+        cursor.moveToFirst();
+        while (cursor.isAfterLast() == false) {
+            AccountModel acc = new AccountModel();
+            acc.setUserName(cursor.getString(cursor.getColumnIndex("USERNAME")));
+            acc.setAppUrl(cursor.getString(cursor.getColumnIndex("APPURL")));
+            acc.setNote(cursor.getString(cursor.getColumnIndex("NOTE")));
+            acc.setAppName(cursor.getString(cursor.getColumnIndex("APPNAME")));
+            acc.setUserFirstPassword(cursor.getString(cursor.getColumnIndex("PASSWORD")));
+            acc.setAppId(cursor.getString(cursor.getColumnIndex("APPID")));
+            acc.setAppCode(cursor.getString(cursor.getColumnIndex("APPCODE")));
             accounts.add(acc);
             cursor.moveToNext();
         }

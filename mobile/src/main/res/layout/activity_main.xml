@@ -24,10 +24,11 @@
         <EditText
             android:id="@+id/input"
             android:layout_width="0dp"
-            android:layout_weight="4"
+            android:layout_weight="2.08"
             android:layout_height="wrap_content"
             android:inputType="textNoSuggestions"
             />
+
         <Button
             android:id="@+id/btn_send"
             android:text="Send"
@@ -35,6 +36,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             />
+
+        <Button
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_notify"
+            android:text="Notify" />
     </LinearLayout>
 
 </RelativeLayout>

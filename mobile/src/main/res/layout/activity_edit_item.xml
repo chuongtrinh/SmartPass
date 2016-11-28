@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_edit_item"
     android:layout_width="match_parent"
@@ -11,242 +11,237 @@
     tools:context="security.smartpass.EditItemActivity">
 
     <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-    <LinearLayout
-
-        android:layout_width="wrap_content"
-
-        android:layout_height="wrap_content"
-
-        android:layout_alignParentBottom="true"
-
-        android:layout_alignParentLeft="true"
-
-        android:layout_alignParentRight="true"
-
-        android:layout_alignParentTop="true"
-
-        android:orientation="vertical" >
-
-
-
-        <TextView
-
-            android:id="@+id/textView1"
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-
-            android:layout_gravity="center_vertical"
-
-            android:text="Update Your Account"
-            android:paddingBottom="16dp"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-
-
-        <TextView
-
-            android:id="@+id/textView2"
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-
-            android:text="Application Name"
-
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
-
-        <EditText
-
-            android:id="@+id/appName"
-
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-
-            android:ems="10"
-
-            android:inputType="textPersonName" >
-
-
-        </EditText>
-
-
-
-        <TextView
-
-            android:id="@+id/textView3"
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-
-            android:text="User Name"
-
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
-
-        <EditText
-
-            android:id="@+id/userName"
-
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-
-            android:ems="10"
-
-            android:inputType="textPersonName" />
-
-
-
-        <TextView
-
-            android:id="@+id/textView4"
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-
-            android:text="Password"
-
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
-
-        <EditText
-
-            android:id="@+id/userPass"
-
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-
-            android:ems="10"
-
-            android:inputType="textPassword" />
-
-        <TextView
-
-            android:id="@+id/textView7"
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-
-            android:text="Confirm Password"
-
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
-
-        <EditText
-
-            android:id="@+id/userPassConfim"
-
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-
-            android:ems="10"
-
-            android:inputType="textPassword" />
-
-
-        <TextView
-
-            android:id="@+id/textView5"
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-
-            android:text="Note"
-
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
-
-        <EditText
-
-            android:id="@+id/userNote"
-
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-
-            android:ems="10"
-
-            android:inputType="textLongMessage" />
-
-
-        <TextView
-
-            android:id="@+id/textView6"
-
-            android:layout_width="wrap_content"
-
-            android:layout_height="wrap_content"
-
-            android:text="Application Url"
-
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
-
-        <EditText
-
-            android:id="@+id/appUrl"
-
-            android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-
-            android:ems="10"
-
-            android:inputType="textPersonName" >
-
-
-        </EditText>
-
-
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        <Button
 
-            android:id="@+id/btnUpdate"
+            android:layout_width="match_parent"
 
-            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
 
-            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
 
-            android:layout_weight="0.2"
+            android:layout_alignParentLeft="true"
 
-            android:text="Update Account" />
+            android:layout_alignParentRight="true"
 
-        <Button
+            android:layout_alignParentTop="true"
 
-            android:id="@+id/btnCancel"
+            android:orientation="vertical" >
 
-            android:layout_width="wrap_content"
 
-            android:layout_height="wrap_content"
 
-            android:layout_gravity="right"
-            android:layout_weight="0.2"
+            <TextView
 
-            android:text="Cancel"
-            android:textAlignment="center" />
+                android:id="@+id/textView1"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:layout_gravity="center_horizontal"
+
+                android:text="Update Your Account"
+                android:paddingBottom="16dp"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+
+
+
+            <TextView
+
+                android:id="@+id/textView2"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:text="Application Name"
+
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+            <TextView
+
+                android:id="@+id/appName"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+
+
+            <TextView
+
+                android:id="@+id/textView3"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:text="User Name"
+
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+
+            <EditText
+
+                android:id="@+id/userName"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:ems="10"
+
+                android:inputType="textPersonName" />
+
+
+
+            <TextView
+
+                android:id="@+id/textView4"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:text="Password"
+
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+
+            <EditText
+
+                android:id="@+id/userPass"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:ems="10"
+
+                android:inputType="textPassword" />
+
+            <TextView
+
+                android:id="@+id/textView7"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:text="Confirm Password"
+
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+
+            <EditText
+
+                android:id="@+id/userPassConfim"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:ems="10"
+
+                android:inputType="textPassword" />
+
+
+            <TextView
+
+                android:id="@+id/textView5"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:text="Note"
+
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+
+            <EditText
+
+                android:id="@+id/userNote"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:ems="10"
+
+                android:inputType="textLongMessage" />
+
+
+            <TextView
+
+                android:id="@+id/textView6"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:text="Application Url"
+
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+
+
+            <EditText
+
+                android:id="@+id/appUrl"
+
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+
+                android:ems="10"
+
+                android:inputType="textPersonName" >
+
+
+            </EditText>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <Button
+
+                    android:id="@+id/btnUpdate"
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="0.2"
+
+                    android:text="Update Account" />
+
+                <Button
+
+                    android:id="@+id/btnCancel"
+
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:layout_gravity="right"
+                    android:layout_weight="0.2"
+
+                    android:text="Cancel"
+                    android:textAlignment="center" />
+            </LinearLayout>
+
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
-</LinearLayout>
+    </ScrollView>
+</RelativeLayout>

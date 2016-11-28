@@ -1,11 +1,15 @@
 package security.smartpass;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -16,20 +20,23 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import java.util.List;
 
 
 public class MainActivity extends Activity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String WEAR_MESSAGE_PATH = "/message";
+    private static final String START_ACTIVITY = "/start_activity";
     private GoogleApiClient mApiClient;
     private ArrayAdapter<String> mAdapter;
     private BroadcastReceiver mBroadcastReceiver;
-    private LoginWearDatabaseAdapter loginWearDatabaseAdapter;
+    Node mNode;
 
     private ListView mListView;
     /**
@@ -37,61 +44,16 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private int notificationId = 001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mListView = (ListView) findViewById(R.id.list);
-
-
-        loginWearDatabaseAdapter=new LoginWearDatabaseAdapter(this);
-        loginWearDatabaseAdapter=loginWearDatabaseAdapter.open();
-
-        loginWearDatabaseAdapter.insertEntry("2","BOA","boaHalfPass");
-        Log.d("debug","Save in the database");
-
-
+        Log.d("debug","start main activity");
         mAdapter = new ArrayAdapter<String>(this, R.layout.list_item);
         mListView.setAdapter(mAdapter);
-
-
-        AccountWearModel acc;
-        List<AccountWearModel> accs = loginWearDatabaseAdapter.getSinlgeEntry("1");
-        if (accs.size() > 0) {
-            acc = accs.get(0);
-            mAdapter.add(acc.getAppName() + " : " + acc.getUserSecondPassword());
-            Log.d("debug",acc.getAppId()+ " : " + acc.getAppName() + " : " + acc.getUserSecondPassword());
-
-        } else {
-            mAdapter.add("Empty");
-            Log.d("debug","empty");
-
-        }
-
-// not needed handled by the onMessageRecieved
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction("ACTION_SEND");
-//
-//        mBroadcastReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, final Intent intent) {
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        String message = intent.getStringExtra("message");
-//                        if (!message.isEmpty()) {
-//                            Log.d("debug","adding :" + message);
-//                            mAdapter.add(message);
-//                            mAdapter.notifyDataSetChanged();
-//                        }
-//                    }
-//                });
-//            }
-//        };
-//
-//        registerReceiver(mBroadcastReceiver, filter);
-
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -101,7 +63,26 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         Log.d("debug","created main activity");
+
+        sendMessage(WEAR_MESSAGE_PATH,"testing");
     }
+
+//    // this intent will open the activity when the user taps the "open" action on the notification
+//    Intent viewIntent = new Intent(this, MyStubBroadcastActivity.class);
+//    PendingIntent pendingViewIntent = PendingIntent.getActivity(this, 0, viewIntent, 0);
+//
+//
+//    NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+//            .setSmallIcon(R.drawable.ic_launcher)
+//            .setContentTitle("hello")
+//            .setContentText("hello world")
+//            .setContentIntent(pendingViewIntent);
+//    Notification notification = builder.build();
+//
+//    NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+//    notificationManagerCompat.notify(notificationId++, notification);
+//
+//    Log.d("debug","after notifciation");
 
     private void initGoogleApiClient() {
         mApiClient = new GoogleApiClient.Builder(this)
@@ -139,16 +120,55 @@ public class MainActivity extends Activity implements MessageApi.MessageListener
                     Log.d("debug","message recieved adding :" + new String(messageEvent.getData()));
                     mAdapter.add(new String(messageEvent.getData()));
                     mAdapter.notifyDataSetChanged();
+                } else {
+                    Log.d("debug", "unknown path" + messageEvent.getPath());
+                    Log.d("debug", "message" + new String(messageEvent.getData()));
                 }
             }
         });
+
+        sendMessage(WEAR_MESSAGE_PATH,"echo:"+ new String(messageEvent.getData()));
     }
 
+    private void sendMessage( final String path, final String text ) {
+        new Thread( new Runnable() {
+            @Override
+            public void run() {
+            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( mApiClient ).await();
+            for(Node node : nodes.getNodes()) {
+                Log.d("send message wear",text);
+                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                        mApiClient, node.getId(), path, text.getBytes() ).await();
+               if(result.getRequestId() == MessageApi.UNKNOWN_REQUEST_ID) {
+                   Log.d("wear", "unable to send message");
+               }
+            }
+            }
+        }).start();
+    }
+
+    /**
+     * Resolve the node = the connected device to send the message to
+     */
+    private void resolveNode() {
+
+        Wearable.NodeApi.getConnectedNodes(mApiClient)
+                .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+                    @Override
+                    public void onResult(NodeApi.GetConnectedNodesResult nodes) {
+                        for (Node node : nodes.getNodes()) {
+                            mNode = node;
+                        }
+                    }
+                });
+    }
 
     @Override
     public void onConnected(Bundle bundle) {
         Log.d("D","connected");
+        //resolveNode();
         Wearable.MessageApi.addListener(mApiClient, this);
+      //  sendMessage(START_ACTIVITY,"");
     }
 
     @Override
