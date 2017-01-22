@@ -33,9 +33,9 @@ public class BackgroundService extends Service {
 
     LoginDatabaseAdapter loginDatabaseAdapter;
     List<AccountModel> accounts;
-    private boolean FLAG_BUSY =false;
+    private static boolean FLAG_BUSY =false;
     private Set<String> currentRunningApp = new HashSet<>();
-    private Set<String> previousRunningApp = new HashSet<>();
+    private static String prevAppCode = "";
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -73,7 +73,7 @@ public class BackgroundService extends Service {
         loginDatabaseAdapter=new LoginDatabaseAdapter(this);
         loginDatabaseAdapter=loginDatabaseAdapter.open();
 
-        Log.w("SmartPass: ", "Start monitoring");
+    //    Log.w("SmartPass: ", "Start monitoring");
         // start monitoring and detecting apps
         callAsynchronousTask(this);
 
@@ -115,8 +115,15 @@ public class BackgroundService extends Service {
         protected void onPostExecute(List<AndroidAppProcess> processes) {
             StringBuilder sb = new StringBuilder();
             sb.append("Running apps:\n");
+            boolean foundBusyapp = false;
             for (AndroidAppProcess app : processes) {
                 String appCode = app.name;
+
+                if (appCode.trim().equals(prevAppCode.trim())) {
+                    foundBusyapp = true;
+                }
+
+
                 sb.append('\n').append(app.name);
                 //previousRunningApp.add(app.name);
                 if (!appCode.isEmpty()) {
@@ -124,29 +131,38 @@ public class BackgroundService extends Service {
                 }
 
             }
-            Log.w("SmartAppService:", sb.toString());
+         //   Log.w("PrevAppCode:", prevAppCode);
+
+            if (FLAG_BUSY && !foundBusyapp) {
+           //     Log.w("Reseting", String.valueOf(foundBusyapp));
+                FLAG_BUSY = false;
+                prevAppCode = "";
+            }
+
+            //Log.w("SmartAppService:", sb.toString());
         }
     }
     public void detectTargetForSmartPassApp(String appCode){
 
-        Log.w("Detected: ",appCode);
+       // Log.w("Detected: ",appCode);
         // For notification testing
         accounts = loginDatabaseAdapter.getSingleEntryWithCode(appCode);
-        Log.w("SmartPass size",String.valueOf(accounts.size()));
+      //  Log.w("SmartPass size",String.valueOf(accounts.size()));
 
         if (accounts.size() > 0) {
             AccountModel account = accounts.get(0);
-
             // Once we can obtain the user's information
             // we can sending notification to the watch
             // -sendNotificationToWatch
             // -recievePassWordFromWatch
-            Log.w("Get from wear: ",account.getAppName());
+          //  Log.w("Get from wear: ",account.getAppName());
             if (!FLAG_BUSY) {
+       //         Log.w("Sending intent: ",account.getAppCode());
                 Intent sendIntent = new Intent(this, NotificationService.class);
                 sendIntent.putExtra("ACTION", Constants.ACTION_NOTIFY_WEAR);
                 sendIntent.putExtra(Constants.APP_NAME, account.getAppName());
                 startService(sendIntent);
+                prevAppCode = account.getAppCode();
                 FLAG_BUSY = true;
             }
             //createNOtification is in onMessageRecieved

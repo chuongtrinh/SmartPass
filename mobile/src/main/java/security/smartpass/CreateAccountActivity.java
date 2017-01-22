@@ -3,8 +3,10 @@ package security.smartpass;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,8 +16,16 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.Collections;
+import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.Set;
 
+
+import se.simbio.encryption.Encryption;
 import security.common.Constants;
 
 public class CreateAccountActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -26,7 +36,7 @@ public class CreateAccountActivity extends AppCompatActivity implements AdapterV
     final App[] apps = new App[] {
             new App("Bank Of America", "com.infonow.bofa"),
             new App("Chase", "com.chase.sig.android"),
-            new App("Facebook","com.facebook.pages.app"),
+            new App("Facebook","com.facebook.katana"),
             new App("Gmail", "com.google.android.gm")
     };
     App selectedApp;
@@ -86,31 +96,110 @@ public class CreateAccountActivity extends AppCompatActivity implements AdapterV
                 }
                 else
                 {
+                    ArrayList<Pair> letters = new ArrayList<Pair>();
+                    String permuted_password = "";
+                    String index_list = "";
+
+                    for(int i = 0; i < password.length(); i++) {
+                        Pair pair = new Pair(i, password.charAt(i));
+                        letters.add(pair);
+                    }
+
+                    Collections.shuffle(letters);
+
+                    for(int i = 0; i < letters.size(); i++) {
+                        permuted_password += letters.get(i).letter;
+                        index_list += letters.get(i).index + ",";
+                    }
+
+
                     // Save the Data in Database
                     // generate password split encrypted algorithm here
-                    int split_index = password.length()/2;
-                    String mobilePass = password.substring(0,split_index);
-                    String wearPass = password.substring(split_index);
-                    Log.w("CREATE ACCT", "name: " + appName +  " password: " + password + "combinded split:" + mobilePass +" : " + wearPass);
+                    int split_index = permuted_password.length()/2;
+                    String mobilePass = permuted_password.substring(0,split_index);
+                    String wearPass = permuted_password.substring(split_index);
+                    Log.w("CREATE ACCT", "name: " + appName + " original password: " + password + " permuted password: " + permuted_password + "\nindex list: " + index_list + " combinded split:" + mobilePass +" + " + wearPass);
 
                     if (!isWearAvailable()) {
                         Toast.makeText(getApplicationContext(), "Please try again - Wear is not connected ", Toast.LENGTH_LONG).show();
                     } else {
-                        String appId = loginDataBaseAdapter.insertEntry(userName, mobilePass, appName, appCode, appUrl, note);
+                        String appId = loginDataBaseAdapter.insertEntry(userName, mobilePass, appName, appCode, appUrl, index_list);
+
+
+                        //String decrypted = encryption.decryptOrNull(encrypted);
+
+                        String encryptedKey = "securesecuresecu";
+                        byte[] iv = "[B@5c79df3fghjkl".getBytes();
+                    //    byte[] iv = getIV();
+
+                        //Encryption encryption = Encryption.getDefault("Key", "Salt", new byte[16]);
+                        Encryption encryption = Encryption.getDefault(encryptedKey, appId, iv);
+
+
+                        String encryptedWearPwd = encryption.encryptOrNull(wearPass);
+
+                        Log.w("Encryption:",encryptedWearPwd);
                         Intent sendIntent = new Intent(CreateAccountActivity.this, NotificationService.class);
                         sendIntent.putExtra("ACTION", Constants.ACTION_UPLOAD_WEAR);
                         sendIntent.putExtra(Constants.APP_ID, appId);
                         sendIntent.putExtra(Constants.APP_NAME, appName);
-                        sendIntent.putExtra(Constants.WEAR_PASS, wearPass);
+                        sendIntent.putExtra(Constants.WEAR_PASS, encryptedWearPwd);
 
                         startService(sendIntent);
 
                         Toast.makeText(getApplicationContext(), "Account Successfully Created ", Toast.LENGTH_LONG).show();
+
+                        String decryptedWearPwd = encryption.decryptOrNull(encryptedWearPwd);
+                        Log.w("Decryption:",decryptedWearPwd);
+
+
                         returnToMain();
                     }
                 }
             }
         });
+    }
+
+    private byte[] getIV() {
+
+        try {
+            FileInputStream fileIn = openFileInput("iv");
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] data = new byte[16];
+            int bytes = 0;
+
+            while (  ( bytes = fileIn.read(data)) != -1 ){
+                bos.write(data, 0, bytes);
+            }
+            byte[] res = bos.toByteArray();
+            return res;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new byte[16];
+        }
+
+    }
+    private String getKey() {
+        try {
+            FileInputStream fileIn=openFileInput("key.txt");
+            InputStreamReader InputRead= new InputStreamReader(fileIn);
+
+            char[] inputBuffer= new char[16];
+            String s="";
+            int charRead;
+
+            while ((charRead=InputRead.read(inputBuffer))>0) {
+                // char to string conversion
+                String readstring=String.copyValueOf(inputBuffer,0,charRead);
+                s +=readstring;
+            }
+            InputRead.close();
+            Log.d("key create", "key:" + s);
+            return s;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "defaultKey";
+        }
     }
 
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id)

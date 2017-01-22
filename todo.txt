@@ -1,0 +1,19 @@
+Mobile
+store password/username (done - chuong)
+make notification on mobile (done - chuong)
+add to clip tray (done - chuong)
+detect foreground application (run as background service) (chuong)
+recieve msg from wear (done -ryan)
+send notification to wear (done - ryan)
+user adding new accounts (done - chuong)
+generate passwords
+lock screen for app
+backup solution
+
+
+Wear
+recieve msg from mobile (done -ryan)
+store passwords and account names (done - Chuong)
+send passwords to mobile (ryan)
+show notificatoin when mobile instructs too (done -ryan)
+scroll through accounts on watch

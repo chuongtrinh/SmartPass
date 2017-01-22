@@ -21,7 +21,15 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+
+import se.simbio.encryption.Encryption;
 
 import security.common.Constants;
 
@@ -61,7 +69,7 @@ public class NotificationService extends IntentService implements GoogleApiClien
 
     }
 
-    public void createNotification(AccountModel account, String wearPass) {
+    public void createNotification(AccountModel account, String wearPassPermuted) {
 
         // Setting up broadcastReceiver for CopyToClipBoard
 
@@ -81,8 +89,27 @@ public class NotificationService extends IntentService implements GoogleApiClien
 
         notificationManager.notify(0, userNameNoti);
 
-        String combinedPass = account.getUserFirstPassword() + wearPass;
-        Log.d("notif mobile", "combineded pass:" + combinedPass);
+        String permuted_password = account.getUserFirstPassword() + wearPassPermuted;
+
+        ArrayList<Pair> letters = new ArrayList<Pair>();
+        String[] index_list = account.getNote().split(",");
+        Log.d("notif mobile", "notes" + account.getNote());
+        String combinedPass = "";
+
+        Log.d("permute", "length password:" + permuted_password.length());
+        for(int i = 0; i < permuted_password.length(); i++) {
+            Pair pair = new Pair(Integer.parseInt(index_list[i]), permuted_password.charAt(i));
+            Log.d("permute", "index: " + index_list[i] + " letter:" + permuted_password.charAt(i));
+            letters.add(pair);
+        }
+
+        Collections.sort(letters);
+
+        for(int i = 0; i < letters.size(); i++) {
+            combinedPass += letters.get(i).letter;
+        }
+
+        Log.d("notif mobile", "permuted pass: " + permuted_password + " combineded pass:" + combinedPass + " length:" + letters.size());
 
         intent = new Intent(this, ClipBoardBroadcastReceiver.class);
         intent.putExtra("credential",combinedPass);
@@ -164,14 +191,31 @@ public class NotificationService extends IntentService implements GoogleApiClien
             String msg = new String(messageEvent.getData());
             String[] elems = msg.split(",");
             String appName = elems[0];
-            String wearPass = elems[1];
+            String wearPassEncrypted = elems[1];
+
+
 
             AccountModel account = loginDatabaseAdapter.getSingleEntry(appName).get(0);
-            createNotification(account, wearPass);
+            String wearPassPermuted = decryptWearPass(account, wearPassEncrypted);
+            createNotification(account, wearPassPermuted);
 
         }
     }
 
+    private String decryptWearPass(AccountModel account, String wearPassEncrypted) {
+
+        String wearPass = "";
+        String encryptedKey = "securesecuresecu";
+        byte[] iv = "[B@5c79df3fghjkl".getBytes();
+      //  byte[] iv = getIV();
+
+        Encryption encryption = Encryption.getDefault(encryptedKey, account.getAppId(), iv);
+        wearPass =  encryption.decryptOrNull(wearPassEncrypted);
+
+        Log.d("decrypt wear pass", "wear pass encrypted:" + wearPassEncrypted + " decrypted:" + wearPass);
+
+        return wearPass;
+    }
 
 
     /**
@@ -234,6 +278,48 @@ public class NotificationService extends IntentService implements GoogleApiClien
         }
 
 
+    }
+
+    private byte[] getIV() {
+
+        try {
+            FileInputStream fileIn = openFileInput("iv");
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] data = new byte[16];
+            int bytes = 0;
+
+            while (  ( bytes = fileIn.read(data)) != -1 ){
+                bos.write(data, 0, bytes);
+            }
+            byte[] res = bos.toByteArray();
+            return res;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new byte[16];
+        }
+
+    }
+    private String getKey() {
+        try {
+            FileInputStream fileIn=openFileInput("key.txt");
+            InputStreamReader InputRead= new InputStreamReader(fileIn);
+
+            char[] inputBuffer= new char[16];
+            String s="";
+            int charRead;
+
+            while ((charRead=InputRead.read(inputBuffer))>0) {
+                // char to string conversion
+                String readstring=String.copyValueOf(inputBuffer,0,charRead);
+                s +=readstring;
+            }
+            InputRead.close();
+            Log.d("key", "key:" + s);
+            return s;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "defaultKey";
+        }
     }
 
 }
